@@ -69,9 +69,6 @@ for filename in os.listdir('D:/dataset/rtsd-public/fullframes/rtsd-frames'):
         print(filename + ' was deleted')
 """
 
-# resize an image using the PIL image library
-# free from:  http://www.pythonware.com/products/pil/index.htm
-# tested with Python24        vegaseat     11oct2005
 from PIL import Image
 import os
 DIR ="D:/dataset/crops2/"
