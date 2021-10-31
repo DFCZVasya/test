@@ -53,6 +53,6 @@ int main()
  }
  gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1, AMO, B, 0, AMON);
  gsl_matrix_memcpy(AMO, AMON);
- 
+ printf("ready!\n");
  return 0;
 }
