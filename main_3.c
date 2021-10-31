@@ -1,6 +1,6 @@
 #include <math.h>
 #include <stdio.h>
-#include <intrin.h>
+#include <gsl/gsl_blas.h>
 
 
 
