@@ -1,127 +1,58 @@
-#include<stdio.h>
-
-#include <cblas.h> // C-интерфейс BLAS (стандартный заголовочный файл)
-
-#include <stdlib.h>
+#include <math.h>
+#include <stdio.h>
+#include <intrin.h>
 
 
 
-void transpose_matrix(float *arr1, float *arr2, int size) {
-  int i, j;
-  for (i = 0; i < size; i++)
-    for (j = 0; j < size; j++)
-      arr2[j* N + i] = arr1[i * N + j];
-  
-}
-
-void mult_matrix(float *A, float *B, float *C, int N)
+int main()
 {
-   cblas_sgemm(CblasRowMajor,CblasNoTrans,CblasNoTrans,N,N,N,1.0,A,N,B,N,0.0,C,N);
-}
-
-void sum_matrix(float *A, float *B, float *C, int N)
-{
-    for(int i = 0; i < N; i++)
-        for(int j = 0; j < N; j++)
-            C[i * N + j] = A[i * N + j] + B[i * N + j];
-        
-}
-
-void sub_matrix(float *A, float *B, float *C, int N)
-{
-    for(int i = 0; i < N; i++)
-        for(int j = 0; j < N; j++)
-            C[i * N + j] = A[i * N + j] - B[i * N + j];
-        
-}
-
-void mult_scalar_matrix(float *A, float *B, float k, int N)
-{
-    for(int i = 0; i < N; i++)
-        for(int j = 0; j < N; j++)
-            B[i * N + j] = A[i * N + j] * k;
-}
-
-float max_sum_line(float* A, int N)
-{
-    float max = 0;
-    float sum = 0;
-    for (int i = 0; i < N; i++)
-    {
-        for (int j = 0; j < N; j++)
-        {
-            sum += A[i * N + j];
-        }
-        if (sum > max) max = sum;
-        sum = 0;
-    }
-    return max;
-}
-
-float max_sum_column(float* A, int N)
-{
-    float max = 0;
-    float sum = 0;
-    for (int i = 0; i < N; i++)
-    {
-        for (int j = 0; j < N; j++)
-        {
-            sum += A[j * N + i];
-        }
-        if (sum > max) max = sum;
-        sum = 0;
-    }
-    return max;
-}
-
-int main() 
-{
-    int N, M;
-
-    scanf("%d %d", &N, &M);
-
-    float *A = (float*)malloc(sizeof(float) * N * N);
-    float *tmp = (float*)malloc(sizeof(float) * N * N);
-    float *tmp2 = (float*)malloc(sizeof(float) * N * N);
-    float *AT = (float*)malloc(sizeof(float) * N* N);
-    float *I = (float*)malloc(sizeof(float) * N* N);
-    float *R = (float*)malloc(sizeof(float) * N* N);
-    float *Answer = (float*)malloc(sizeof(float) * N* N);
-    for (int i = 0; i < N; i++)
-    {
-        for (int j = 0; j < N; j++)
-        {
-            A[i * N + j] = rand() % 101;
-            Answer[i * N + j] = 0;
-            if (i == j) I[i * N * j] = 1.0;
-        }
-    }
-    
-    transpose_matrix(A, AT, N);
-    float k = max_sum_column(A, N) * max_sum_line(A, N);
-
-    mult_scalar_matrix(AT, AT, 1.0/k, N); //B
-    mult_matrix(AT, A, tmp, N); //BA
-    sub_matrix(I, tmp, R, N); //R
-    sum_matrix(Answer, I, Answer, N);
-    mult_scalar_matrix(R, tmp, 1, N);
-    sum_matrix(Answer, R, Answer, N);
-    for (int i = 0; i < M-1; i++)
-    {
-        mult_matrix(tmp, R, tmp2, N);
-        mult_scalar_matrix(tmp2, tmp, 1, N);
-        sum_matrix(Answer, tmp, Answer, N);
-    }
-    mult_matrix(Answer, AT, tmp, N);
-    mult_scalar_matrix(tmp, Answer,1,N);
-
-    free(A) ;
-    free(tmp); 
-    free(tmp2);
-    free(AT);
-    free(I);
-    free(R);
-    free(Answer);
-    printf("ready!");
-
+ int N, M;
+ scanf("%d %d", &N, &M);
+ gsl_matrix *I = gsl_matrix_calloc(N, N);
+ gsl_matrix* A = gsl_matrix_calloc(N, N);
+ for (int i = 0; i < N; i++)
+ {
+  for (int ii = 0; ii < N; ii++)
+  {
+   gsl_matrix_set(A, i, ii, rand() % 101;);
+  }
+ }
+ for (int i = 0; i < N; i++)
+ {
+  for (int ii = 0; ii < N; ii++)
+  {
+   if (i == ii)
+   {
+    gsl_matrix_set(I, i, ii, 1);
+   }
+  }
+ }
+ gsl_matrix* B = gsl_matrix_calloc(N, N);
+ gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1, A, I, 0, B);
+ float a1 = gsl_matrix_norm1(A);
+ gsl_matrix* AT = gsl_matrix_calloc(N, N);
+ gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1, A, I, 0, AT);
+ float aInf = gsl_matrix_norm1(AT);
+ gsl_matrix* BN = gsl_matrix_calloc(N, N);
+ gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1/(a1 * aInf), B, I, 0, BN);
+ gsl_matrix_memcpy(B, BN);
+ gsl_matrix* R = gsl_matrix_alloc(N, N);
+ gsl_matrix_memcpy(R, I);
+ gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, -1, B, A, 1, R);
+ gsl_matrix* AMO = gsl_matrix_calloc(N, N);
+ gsl_matrix* AMON = gsl_matrix_calloc(N, N);
+ gsl_matrix* NT = gsl_matrix_calloc(N, N);
+ gsl_matrix* NTN = gsl_matrix_calloc(N, N);
+ gsl_matrix_memcpy(AMO, I);
+ gsl_matrix_memcpy(NT, R);
+ for (int i = 0; i < m; i++)
+ {
+  gsl_matrix_add(AMO, NT);
+  gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1, NT, R, 0, NTN);
+  gsl_matrix_memcpy(NT, NTN);
+ }
+ gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1, AMO, B, 0, AMON);
+ gsl_matrix_memcpy(AMO, AMON);
+ 
+ return 0;
 }
